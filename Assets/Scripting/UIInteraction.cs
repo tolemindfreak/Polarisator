@@ -21,9 +21,9 @@ public class UIInteraction : MonoBehaviour {
 		m_LevelPanel.alpha = 0;
 		m_LevelPanel.gameObject.SetActive (true);
 
-		m_LevelPanel.DOFade(1, 0.5f).OnComplete(() =>
-			{
+        m_LevelPanel.DOFade(1, 0.5f).OnComplete(() =>
+        {
 
-			});
+        });
 	}
 }
