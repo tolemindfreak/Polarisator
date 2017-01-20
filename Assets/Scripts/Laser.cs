@@ -20,7 +20,7 @@ public class Laser : MonoBehaviour {
         LinePosition = new Vector3[2];
         transform.eulerAngles = new Vector3(0f, 90f, 0f);
         lineRenderer = GetComponent<LineRenderer>();
-        lineRenderer.startWidth = lineRenderer.endWidth = GameManager.instance.LaserWidth;
+        lineRenderer.SetWidth(GameManager.instance.LaserWidth, GameManager.instance.LaserWidth);
 
         /// Set End Effect
         endEffect = GetComponentInChildren<ParticleSystem>();
@@ -36,9 +36,10 @@ public class Laser : MonoBehaviour {
 
     void RenderLaser () {
         UpdateLength();
-        lineRenderer.startColor = lineRenderer.endColor = GameManager.instance.LaserColor;
+        lineRenderer.SetColors(GameManager.instance.LaserColor, GameManager.instance.LaserColor);
         LinePosition[0] = transform.position;
-        lineRenderer.numPositions = LinePosition.Length;
+        lineRenderer.SetVertexCount(LinePosition.Length);
+        //lineRenderer.numPositions = LinePosition.Length;
         for (int i = 0; i < LinePosition.Length; i++)
         {
             lineRenderer.SetPosition(i, LinePosition[i]);
@@ -58,6 +59,7 @@ public class Laser : MonoBehaviour {
         RaycastHit2D hit2D = Physics2D.Raycast(transform.position, new Vector2((float)Mathf.Cos(Mathf.Deg2Rad * DegreeRotation), (float)Mathf.Sin(Mathf.Deg2Rad * DegreeRotation)), GameManager.instance.MaxLength);
         if (hit2D)
         {
+
             Collider2D theObj = hit2D.collider;
             if (hit2D.collider.GetComponent<Mirror>() != null)
             {
