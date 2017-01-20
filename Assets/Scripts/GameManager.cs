@@ -15,9 +15,8 @@ public class GameManager : MonoBehaviour {
     public Color MirrorNormalColor;
     public Color MirrorHitColor;
 
-    [Header("Mirror Object")]
-    public Mirror[] LevelMirror;
-    public List<Mirror> ConnectedMirror = new List<Mirror>();
+    private Mirror[] LevelMirror;
+    private List<Mirror> ConnectedMirror = new List<Mirror>();
 
     void Awake()
     {
