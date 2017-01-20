@@ -26,4 +26,37 @@ public class UIInteraction : MonoBehaviour {
 
         });
 	}
+
+	public void CloseLevel()
+	{
+		m_LevelPanel.alpha = 1;
+		m_LevelPanel.gameObject.SetActive (false);
+
+		m_LevelPanel.DOFade(1, 0.5f).OnComplete(() =>
+			{
+
+			});
+	}
+
+	public void OpenQuit()
+	{
+		m_QuitPanel.alpha = 0;
+		m_QuitPanel.gameObject.SetActive (true);
+
+		m_QuitPanel.DOFade (1, 0.5f).OnComplete (() => 
+			{
+				
+			});
+	}
+
+	public void CloseQuit()
+	{
+		m_QuitPanel.alpha = 1;
+		m_QuitPanel.gameObject.SetActive (false);
+
+		m_QuitPanel.DOFade (1, 0.5f).OnComplete (() => 
+			{
+
+			});
+	}
 }
