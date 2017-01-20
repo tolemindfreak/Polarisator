@@ -18,7 +18,6 @@ public class Laser : MonoBehaviour {
 
 	void Start () {
         LinePosition = new Vector3[2];
-        transform.eulerAngles = new Vector3(0f, 90f, 0f);
         lineRenderer = GetComponent<LineRenderer>();
         lineRenderer.SetWidth(GameManager.instance.LaserWidth, GameManager.instance.LaserWidth);
 
@@ -67,6 +66,8 @@ public class Laser : MonoBehaviour {
                     ContactedMirror = hit2D.collider.GetComponent<Mirror>();
                 else
                 {
+                    ContactedMirror.SourcePosition = transform.position;
+                    ContactedMirror.PointOfContact = hit2D.point;
                     ContactedMirror.StartMirroring();
                 }
 
