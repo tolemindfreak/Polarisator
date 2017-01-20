@@ -43,9 +43,6 @@ public class Laser : MonoBehaviour {
         {
             lineRenderer.SetPosition(i, LinePosition[i]);
         }
-
-        if (ContactedMirror)
-            ContactedMirror.HasContact = true;
     }
 
     void UpdateLength () {
@@ -54,40 +51,48 @@ public class Laser : MonoBehaviour {
 
         MaxPosition = new Vector3(transform.position.x + (float)Mathf.Cos(Mathf.Deg2Rad * DegreeRotation) * GameManager.instance.MaxLength, transform.position.y + (float)Mathf.Sin(Mathf.Deg2Rad * DegreeRotation) * GameManager.instance.MaxLength, transform.position.z);
 
+        RaycastHit2D hit2D = Physics2D.Linecast(transform.position,MaxPosition);
 
-        RaycastHit2D hit2D = Physics2D.Raycast(transform.position, new Vector2((float)Mathf.Cos(Mathf.Deg2Rad * DegreeRotation), (float)Mathf.Sin(Mathf.Deg2Rad * DegreeRotation)), GameManager.instance.MaxLength);
         if (hit2D)
         {
-
             Collider2D theObj = hit2D.collider;
-            if (hit2D.collider.GetComponent<Mirror>() != null)
-            {
-                if(!ContactedMirror)
-                    ContactedMirror = hit2D.collider.GetComponent<Mirror>();
-                else
-                {
-                    ContactedMirror.SourcePosition = transform.position;
-                    ContactedMirror.PointOfContact = hit2D.point;
-                    ContactedMirror.StartMirroring();
-                }
-
-            }
-                
-
             if (theObj.CompareTag("mirror"))
             {
-                LinePosition[1] = hit2D.point;
-                if (endEffect)
+                if(theObj.GetComponent<Mirror>() != null)
                 {
-                    endEffectTransform.position = hit2D.point;
-                    if (!endEffect.isPlaying) endEffect.Play();
-                    return;
+                    if (!ContactedMirror)
+                        ContactedMirror = hit2D.collider.GetComponent<Mirror>();
+                    else
+                    {
+                        ContactedMirror.SourcePosition = transform.position;
+                        Vector3 ThePointOfContact = new Vector3((hit2D.point.x - transform.position.x) > 0 ? hit2D.point.x - 0.05f : hit2D.point.x + 0.05f, (hit2D.point.y - transform.position.y) > 0 ? hit2D.point.y + 0.05f : hit2D.point.y - 0.05f, transform.position.z);
+                        ContactedMirror.PointOfContact = new Vector3((hit2D.point.x - transform.position.x) > 0 ? hit2D.point.x - 0.05f: hit2D.point.x + 0.05f, (hit2D.point.y - transform.position.y) > 0 ? hit2D.point.y + 0.05f : hit2D.point.y - 0.05f,transform.position.z);
+                        ContactedMirror.StartMirroring();
+                        LinePosition[1] = ThePointOfContact;
+                        if (endEffect)
+                        {
+                            endEffectTransform.position = hit2D.point;
+                            if (!endEffect.isPlaying) endEffect.Play();
+                            return;
+                        }
+                    }
                 }
+            }
+            else
+            {
+                LinePosition[1] = MaxPosition;
+                if (ContactedMirror)
+                    ContactedMirror.StopMirroring();
+
+                ContactedMirror = null;
             }
         }
         else
         {
             LinePosition[1] = MaxPosition;
+            if (ContactedMirror)
+                ContactedMirror.StopMirroring();
+
             ContactedMirror = null;
         }
     }
