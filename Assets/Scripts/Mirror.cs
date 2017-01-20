@@ -13,10 +13,12 @@ public class Mirror : MonoBehaviour {
     public Vector3 PointOfContact;
     public Vector3 SourcePosition;
 
+    private SpriteRenderer spriteRenderer;
     private LineRenderer lineRenderer;
     private Vector3[] LinePosition;
     public Vector3 MaxPosition;
     public Mirror ContactedMirror;
+    public TheTarget ContactedTarget;
 
     private Transform endEffectTransform;
 
@@ -25,6 +27,9 @@ public class Mirror : MonoBehaviour {
         LinePosition = new Vector3[2];
         lineRenderer = GetComponent<LineRenderer>();
         lineRenderer.SetWidth(GameManager.instance.LaserWidth, GameManager.instance.LaserWidth);
+
+        ///Set The Sprite Renderer
+        spriteRenderer = GetComponent<SpriteRenderer>();
 
         /// Set End Effect
         endEffect = GetComponentInChildren<ParticleSystem>();
@@ -35,12 +40,29 @@ public class Mirror : MonoBehaviour {
     }
 
     public void StartMirroring () {
-        Debug.Log("Masuk Start Mirroring " + id);
+        if (spriteRenderer != null)
+            spriteRenderer.color = GameManager.instance.MirrorHitColor;
+
+        if (!HasContact)
+        {
+            HasContact = true;
+            GameManager.instance.AddConnectedMirror(this);
+        }
+
         RenderLeser();
     }
 
     public void StopMirroring()
     {
+        if (spriteRenderer != null)
+            spriteRenderer.color = GameManager.instance.MirrorNormalColor;
+
+        if(HasContact)
+        {
+            HasContact = false;
+            //GameManager.instance.RemoveConnectedMirror(this);
+        }
+
         lineRenderer.SetVertexCount(0);
         SourceID = "";
         SourcePosition = Vector3.zero;
@@ -48,6 +70,7 @@ public class Mirror : MonoBehaviour {
         {
             LinePosition[i] = Vector3.zero;
         }
+
     }
 
     void RenderLeser()
@@ -75,8 +98,6 @@ public class Mirror : MonoBehaviour {
             DegreePhi = 0;
         }
 
-
-        Debug.Log(DegreePhi);
         float DegreeRotation = DegreePhi + (transform.eulerAngles.z * 2) + (Mathf.Atan(((Mathf.PI/2) + ((PointOfContact.x - SourcePosition.x) / (PointOfContact.y - SourcePosition.y)))));
 
         MaxPosition = new Vector3(PointOfContact.x + (float)Mathf.Cos(Mathf.Deg2Rad * DegreeRotation) * GameManager.instance.MaxLength, PointOfContact.y + (float)Mathf.Sin(Mathf.Deg2Rad * DegreeRotation) * GameManager.instance.MaxLength, PointOfContact.z);
@@ -129,6 +150,34 @@ public class Mirror : MonoBehaviour {
 
                     ContactedMirror = null;
                 }
+            }else if (theObj.CompareTag("target"))
+            {
+                if (theObj.GetComponent<TheTarget>() != null)
+                {
+
+                    if (!ContactedTarget)
+                    {
+                        ContactedTarget = hit2D.collider.GetComponent<TheTarget>();
+                    }
+                    else
+                    {
+                        ContactedTarget.CheckFinish();
+                    }
+
+                    Vector3 ThePointOfContact = new Vector3((hit2D.point.x - PointOfContact.x) > 0 ? hit2D.point.x - 0.05f : hit2D.point.x + 0.05f, (hit2D.point.y - PointOfContact.y) > 0 ? hit2D.point.y + 0.05f : hit2D.point.y - 0.05f, PointOfContact.z);
+                    LinePosition[1] = ThePointOfContact;
+                    if (endEffect)
+                    {
+                        endEffectTransform.position = hit2D.point;
+                        if (!endEffect.isPlaying) endEffect.Play();
+                        return;
+                    }
+                }
+                else
+                {
+                    LinePosition[1] = MaxPosition;
+                    ContactedTarget = null;
+                }
             }
             else
             {
@@ -136,6 +185,7 @@ public class Mirror : MonoBehaviour {
                 if (ContactedMirror)
                     ContactedMirror.StopMirroring();
 
+                ContactedTarget = null;
                 ContactedMirror = null;
             }
         }
@@ -145,6 +195,8 @@ public class Mirror : MonoBehaviour {
             if (ContactedMirror)
                 ContactedMirror.StopMirroring();
 
+
+            ContactedTarget = null;
             ContactedMirror = null;
         }
     }
